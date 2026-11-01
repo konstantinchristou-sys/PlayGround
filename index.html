@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a0d18" />
+    <title>VOLT CITY — E-Scooter Freeride</title>
+    <meta name="description" content="Ride an e-scooter through a neon sunset city, launch off skatepark ramps, land flips, hold wheelies and upgrade your ride." />
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene" aria-label="Volt City 3D game"></canvas>
+      <div id="vignette"></div>
+      <div id="speedlines"></div>
+
+      <!-- ============================ HUD ============================ -->
+      <div id="hud" class="hidden">
+        <header class="hud-top">
+          <div class="brand">
+            <div class="brand-mark">V</div>
+            <div class="brand-text">
+              <strong>VOLT CITY</strong>
+              <span>E-SCOOTER FREERIDE</span>
+            </div>
+          </div>
+          <div class="stat-pills">
+            <div class="pill money-pill">
+              <span class="pill-label">CASH</span>
+              <span id="moneyValue" class="pill-value">$0</span>
+            </div>
+            <div class="pill score-pill">
+              <span class="pill-label">RUN</span>
+              <span id="scoreValue" class="pill-value">0</span>
+            </div>
+          </div>
+          <div class="hud-right">
+            <div class="hud-buttons">
+              <button id="muteBtn" class="icon-btn" aria-label="Mute sound" title="Mute (M)">♪</button>
+              <button id="shopBtn" class="icon-btn shop-icon" aria-label="Open shop" title="Shop (E)">SHOP</button>
+              <button id="pauseBtn" class="icon-btn" aria-label="Pause" title="Pause (Esc)">II</button>
+            </div>
+            <div class="minimap-wrap">
+              <canvas id="minimap" width="168" height="168"></canvas>
+              <div class="minimap-label">VOLT CITY</div>
+            </div>
+          </div>
+        </header>
+
+        <aside id="quests" class="quests">
+          <div class="quests-head">
+            <span>RANDOM QUESTS</span>
+            <button id="rerollAll" class="mini-btn" title="Reroll all quests">↻</button>
+          </div>
+          <div id="questList"></div>
+        </aside>
+
+        <div id="locationBanner" class="location-banner hidden">
+          <span class="loc-kicker">NOW ENTERING</span>
+          <strong id="locName">VOLT CITY SKATE PARK</strong>
+        </div>
+
+        <div id="comboBox" class="combo-box hidden">
+          <span id="comboMult">COMBO ×1</span>
+          <strong id="comboPoints">0</strong>
+        </div>
+
+        <div id="trickPop" class="trick-pop hidden">
+          <span id="trickName">BACKFLIP</span>
+          <em id="trickPoints">+150</em>
+        </div>
+
+        <div id="toasts" class="toasts"></div>
+
+        <div id="speedo" class="speedo">
+          <svg viewBox="0 0 160 160" class="speedo-svg" aria-hidden="true">
+            <circle cx="80" cy="80" r="70" class="speedo-track" />
+            <circle cx="80" cy="80" r="70" class="speedo-fill" id="speedoArc" />
+            <g id="speedoTicks"></g>
+          </svg>
+          <div class="speedo-center">
+            <strong id="speedValue">0</strong>
+            <span>KM/H</span>
+          </div>
+          <div class="speedo-scooter"><span id="scooterName">STREET STARTER</span></div>
+        </div>
+
+        <div id="moveMeters" class="move-meters">
+          <div id="wheelieMeter" class="meter hidden">
+            <div class="meter-head"><span>WHEELIE</span><span id="wheelieHint">RELEASE IN THE GREEN</span></div>
+            <div class="meter-track">
+              <div class="meter-green"></div>
+              <div class="meter-marker" id="wheelieMarker"></div>
+            </div>
+          </div>
+          <div id="rotDial" class="rot-dial hidden">
+            <div class="rot-ring">
+              <div class="rot-needle" id="rotNeedle"></div>
+              <div class="rot-hub"></div>
+            </div>
+            <div class="rot-meta">
+              <strong id="rotTrick">BACKFLIP</strong>
+              <span id="rotDegrees">0°</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="trick-buttons" id="trickButtons">
+          <button class="trick-btn backflip" data-trick="backflip"><span class="tb-key">J</span><span class="tb-name">BACKFLIP</span></button>
+          <button class="trick-btn frontflip" data-trick="frontflip"><span class="tb-key">K</span><span class="tb-name">FRONTFLIP</span></button>
+          <button class="trick-btn sideflip" data-trick="sideflip"><span class="tb-key">L</span><span class="tb-name">SIDEFLIP</span></button>
+          <button class="trick-btn barspin" data-trick="barspin"><span class="tb-key">I</span><span class="tb-name">BARSPIN</span></button>
+        </div>
+
+        <div class="touch-controls" id="touchControls">
+          <div class="joystick" id="joystick">
+            <div class="joystick-ring"></div>
+            <div class="joystick-knob" id="joystickKnob"></div>
+            <span class="joy-label">STEER</span>
+          </div>
+          <div class="touch-actions">
+            <button id="touchWheelie" class="touch-btn wheelie-btn">WHEELIE</button>
+            <button id="touchJump" class="touch-btn jump-btn">JUMP</button>
+          </div>
+        </div>
+
+        <div id="controlsHint" class="controls-hint">
+          <span><b>WASD</b> ride</span>
+          <span><b>SPACE</b> ollie</span>
+          <span><b>J K L I</b> flips + barspin</span>
+          <span><b>SHIFT</b> wheelie</span>
+          <span><b>E</b> shop</span>
+          <span><b>ESC</b> pause</span>
+        </div>
+
+        <div id="bailBox" class="bail-box hidden">
+          <strong>BAILED!</strong>
+          <span id="bailReason">Over-rotated the flip.</span>
+        </div>
+      </div>
+
+      <!-- ============================ TITLE ============================ -->
+      <section id="title" class="title-screen">
+        <div class="title-bg"></div>
+        <div class="title-content">
+          <div class="eyebrow"><span class="dot"></span> VOLT CITY · 2088</div>
+          <h1 class="title-logo">
+            <span class="volt">VOLT</span>
+            <span class="city">CITY</span>
+          </h1>
+          <p class="title-sub">E-SCOOTER FREERIDE</p>
+          <p class="title-copy">
+            Sunset streets. Airy ramps. One sketchy e-scooter. Send flips in the skate park,
+            hold a wheelie down the boulevard, and grind quests for cash to buy a faster ride.
+          </p>
+          <div class="title-actions">
+            <button id="playBtn" class="play-btn" aria-label="Play">
+              <span class="play-icon">▶</span> PLAY
+            </button>
+            <button id="titleShopBtn" class="ghost-btn">SCOOTER SHOP</button>
+          </div>
+          <div class="title-stats">
+            <div><span>BEST RUN</span><strong id="titleBest">$0</strong></div>
+            <div><span>RIDES OWNED</span><strong id="titleOwned">1 / 6</strong></div>
+            <div><span>QUESTS</span><strong>ENDLESS</strong></div>
+          </div>
+          <div class="title-controls">
+            <div><b>WASD</b><span>ride &amp; steer</span></div>
+            <div><b>SPACE</b><span>ollie</span></div>
+            <div><b>J K L I</b><span>tricks — hold, then release</span></div>
+            <div><b>SHIFT</b><span>wheelie — time the release</span></div>
+          </div>
+        </div>
+        <div class="title-corner">
+          <span>SKATE PARK</span>
+          <span>NEON DOWNTOWN</span>
+          <span>ENDLESS STREETS</span>
+        </div>
+        <div class="title-scroll">PRESS PLAY TO DROP IN</div>
+      </section>
+
+      <!-- ============================ SHOP ============================ -->
+      <section id="shop" class="overlay hidden">
+        <div class="panel shop-panel">
+          <div class="panel-head">
+            <div>
+              <span class="panel-kicker">VOLT CITY GARAGE</span>
+              <h2>SCOOTER SHOP</h2>
+            </div>
+            <div class="shop-wallet">
+              <span>YOUR CASH</span>
+              <strong id="shopMoney">$0</strong>
+            </div>
+            <button id="shopClose" class="close-btn" aria-label="Close shop">✕</button>
+          </div>
+          <p class="panel-copy">Faster decks unlock bigger airs and bigger lines. Buy once, ride forever.</p>
+          <div id="shopGrid" class="shop-grid"></div>
+          <div class="shop-foot">
+            <span>Cash is earned from tricks, coins and random quests.</span>
+            <button id="shopResume" class="ghost-btn">BACK TO THE STREETS</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================ PAUSE ============================ -->
+      <section id="pause" class="overlay hidden">
+        <div class="panel pause-panel">
+          <span class="panel-kicker">TAKE A BREATHER</span>
+          <h2>PAUSED</h2>
+          <p class="panel-copy">The city keeps glowing without you.</p>
+          <div class="pause-actions">
+            <button id="resumeBtn" class="play-btn small" aria-label="Resume">RESUME</button>
+            <button id="pauseShopBtn" class="ghost-btn">SCOOTER SHOP</button>
+            <button id="restartBtn" class="ghost-btn">RESTART RUN</button>
+            <button id="pauseMuteBtn" class="ghost-btn">SOUND: ON</button>
+          </div>
+          <div class="pause-controls">
+            <div><b>W A S D</b><span>accelerate, brake, steer</span></div>
+            <div><b>SPACE</b><span>ollie / jump</span></div>
+            <div><b>J</b><span>backflip — hold to rotate</span></div>
+            <div><b>K</b><span>frontflip</span></div>
+            <div><b>L</b><span>sideflip</span></div>
+            <div><b>I</b><span>barspin</span></div>
+            <div><b>SHIFT</b><span>wheelie — release in the green</span></div>
+            <div><b>E / ESC</b><span>shop / pause</span></div>
+          </div>
+          <p class="pause-tip">Trick tip: release a flip just before the needle hits the top. Hold too long and you will over-rotate into the concrete.</p>
+        </div>
+      </section>
+
+      <div id="loading" class="loading hidden"><span></span><p>BUILDING VOLT CITY…</p></div>
+    </div>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
