@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#0a1220" />
+  <meta name="description" content="VOLT RUSH — a 3D open-world e-scooter freestyle game. Ride Sunset City, hit the skate park, land flips and buy faster scooters." />
+  <title>VOLT RUSH — Sunset City E-Scooter Freestyle</title>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <canvas id="game" aria-label="3D e-scooter game"></canvas>
+  <div id="vignette"></div>
+
+  <div id="start-screen">
+    <div class="start-shade"></div>
+    <div class="start-grid"></div>
+    <div class="start-inner">
+      <div class="eyebrow">SUNSET CITY · FREESTYLE</div>
+      <h1 class="brand">VOLT<span>RUSH</span></h1>
+      <p class="tagline">Big air. Bigger streets.<br />Own the city on two wheels.</p>
+      <button id="start-btn" aria-label="Start"><span>START RIDING</span><i></i></button>
+      <div class="start-controls">
+        <div class="ctrl"><b>WASD</b><span>DRIVE</span></div>
+        <div class="ctrl"><b>SPACE</b><span>JUMP</span></div>
+        <div class="ctrl"><b>SHIFT</b><span>WHEELIE</span></div>
+        <div class="ctrl"><b>1–4</b><span>TRICKS</span></div>
+      </div>
+      <div class="start-best">BEST SAVED RUN <b id="start-money">$150</b></div>
+      <p class="start-note">Hold a trick key in the air and release in the green zone. Hold too long and you’ll over-rotate.</p>
+    </div>
+    <div class="start-scooter" aria-hidden="true">
+      <svg viewBox="0 0 560 320" role="img">
+        <defs>
+          <linearGradient id="deckGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#38f6ff" />
+            <stop offset="1" stop-color="#ff3d8b" />
+          </linearGradient>
+          <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="7" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+        </defs>
+        <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="118" cy="232" r="54" stroke="#0b1220" stroke-width="24" />
+          <circle cx="118" cy="232" r="54" stroke="url(#deckGrad)" stroke-width="7" />
+          <circle cx="118" cy="232" r="9" stroke="#9ffcff" stroke-width="5" />
+          <circle cx="436" cy="232" r="54" stroke="#0b1220" stroke-width="24" />
+          <circle cx="436" cy="232" r="54" stroke="url(#deckGrad)" stroke-width="7" />
+          <circle cx="436" cy="232" r="9" stroke="#9ffcff" stroke-width="5" />
+          <path d="M118 232 L214 232 L258 196 L392 196 L436 232" stroke="#0b1220" stroke-width="22" />
+          <path d="M118 232 L214 232 L258 196 L392 196 L436 232" stroke="url(#deckGrad)" stroke-width="8" filter="url(#glow)" />
+          <path d="M392 196 L348 78 L316 78" stroke="#e9fbff" stroke-width="9" />
+          <path d="M348 78 L316 78" stroke="#38f6ff" stroke-width="12" filter="url(#glow)" />
+          <path d="M392 196 L348 78" stroke="#9ffcff" stroke-width="4" opacity=".8" />
+          <path d="M292 78 L338 78" stroke="#ff3d8b" stroke-width="11" filter="url(#glow)" />
+          <path d="M420 92 L470 60" stroke="#ffc83d" stroke-width="5" opacity=".8" />
+          <path d="M450 110 L500 84" stroke="#38f6ff" stroke-width="3" opacity=".6" />
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div id="hud" class="hidden">
+    <div class="hud-top">
+      <div class="hud-left">
+        <div class="money-chip"><span class="coin"></span><span id="money">$150</span></div>
+        <div class="scooter-chip"><span class="dot" id="scooter-dot"></span><span id="scooter-name">Rusty Rocket</span></div>
+      </div>
+
+      <div id="quest-card" class="panel hidden">
+        <div class="quest-head">
+          <span class="quest-icon">◆</span>
+          <span id="quest-title">RANDOM QUEST</span>
+          <span id="quest-timer"></span>
+        </div>
+        <div id="quest-desc">Loading the next job…</div>
+        <div class="quest-bar"><i id="quest-fill"></i></div>
+        <div class="quest-foot">
+          <span id="quest-reward"></span>
+          <span id="quest-progress"></span>
+        </div>
+      </div>
+
+      <div class="hud-right">
+        <div class="speed"><span id="speed">0</span><small>KM/H</small></div>
+        <div id="combo" class="combo hidden">COMBO <b>x1.0</b></div>
+        <div class="top-actions">
+          <button id="shop-btn" class="icon-btn" aria-label="Shop">SHOP</button>
+          <button id="mute-btn" class="icon-btn" aria-label="Mute">♪</button>
+        </div>
+        <canvas id="minimap" width="150" height="150" aria-label="Minimap"></canvas>
+      </div>
+    </div>
+
+    <div id="garage-prompt" class="prompt hidden"><b>E</b> OPEN VOLT GARAGE</div>
+
+    <div id="meter" class="meter hidden">
+      <div class="meter-top"><span id="meter-label">TRICK</span><span id="meter-hint">RELEASE IN GREEN</span></div>
+      <div class="meter-bar"><i id="meter-fill"></i><span class="zone"></span></div>
+    </div>
+
+    <div id="trick-hints">
+      <div class="trick-hint" data-trick="barspin"><b>1</b><span>BARSPIN</span></div>
+      <div class="trick-hint" data-trick="backflip"><b>2</b><span>BACKFLIP</span></div>
+      <div class="trick-hint" data-trick="frontflip"><b>3</b><span>FRONTFLIP</span></div>
+      <div class="trick-hint" data-trick="sideflip"><b>4</b><span>SIDEFLIP</span></div>
+    </div>
+
+    <div id="popup"></div>
+    <div id="toasts"></div>
+    <div id="crash-flash"></div>
+
+    <div id="mobile-controls">
+      <div id="joystick" aria-label="Drive joystick"><div id="stick"></div></div>
+      <div class="touch-actions">
+        <button id="btn-wheelie" class="tbtn wheelie">WHEELIE</button>
+        <button id="btn-jump" class="tbtn jump">JUMP</button>
+      </div>
+      <div id="trick-pad">
+        <button class="tbtn trick" data-trick="barspin">BAR</button>
+        <button class="tbtn trick" data-trick="backflip">BACK</button>
+        <button class="tbtn trick" data-trick="frontflip">FRONT</button>
+        <button class="tbtn trick" data-trick="sideflip">SIDE</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="shop-modal" class="modal hidden">
+    <div class="shop-panel">
+      <div class="shop-head">
+        <div>
+          <div class="eyebrow">VOLT GARAGE</div>
+          <h2>CHOOSE YOUR RIDE</h2>
+        </div>
+        <div class="shop-money"><span class="coin"></span><span id="shop-money">$150</span></div>
+        <button id="shop-close" aria-label="Close shop">×</button>
+      </div>
+      <div id="scooter-grid"></div>
+      <div class="shop-foot">Quests, coins and style pay cash. Every scooter is faster than the last — buy up and send it bigger.</div>
+    </div>
+  </div>
+
+  <noscript><div class="noscript">VOLT RUSH needs JavaScript and WebGL.</div></noscript>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
